@@ -1,6 +1,5 @@
 const http    = require('http'),
-      fs      = require('fs')
-      Bot     = require('node-telegram-bot'),
+      Bot     = require('node-telegram-bot-api'),
       mongodb = require('mongodb')
 
 var num = 1
@@ -15,7 +14,7 @@ var collectionNews
 
 const MongoClient = mongodb.MongoClient
 const url = 'mongodb://mah:!193M71i5@jello.modulusmongo.net:27017/it9ubEqe'
-const bot = new Bot({token : '328570988:AAF7h6EPFIGl_UUwyy07dyEMbHy6f5RTIpQ'})
+const bot = new Bot('328570988:AAF7h6EPFIGl_UUwyy07dyEMbHy6f5RTIpQ', {polling: true})
 
 
 
@@ -37,7 +36,8 @@ function startbot () {
                 var Mtext = message.text
                 switch (Mtext) {
                     case '/start':
-                        collectionUsers.find({_id: message.from.id}).toArray((err, result) => {
+                        bot.sendMessage(message.chat.id, `hello ${message.chat.first_name}`)
+                        collectionUsers.find({_id: message.chat.id}).toArray((err, result) => {
                                 if (err) {console.log(err)}
                                 else if (result.length) {
                                     console.log('finded')
@@ -45,12 +45,13 @@ function startbot () {
                                 else {
                                     console.log('not found')
                                     sendType = 1
-                                    collectionUsers.insertOne({_id: message.from.id, name: message.from.first_name, username: message.from.username})
+                                    collectionUsers.insertOne({_id: message.chat.id, name: message.chat.first_name, username: message.chat.username})
                                     getNews(sendType, message)
                                 }
                             })
                         break;
                     case 'ایرنا':
+                        bot.sendMessage(message.chat.id, 'please wait...')
                         console.log('irna')
                         sendType = 1
                         home_url = 'http://www.irna.ir'
@@ -111,10 +112,10 @@ function getNews(sendType, message) {
                     else if (result.length) console.log('found', index)
                     else {
                         console.log('not found', index)
-                        collectionNews.insertOne({_id: item})
+                        //collectionNews.insertOne({_id: item})
                         if (sendType === 1) {
                             console.log('type 1')
-                            id = message.from.id
+                            id = message.chat.id
                             console.log(id,'-', index)
                             sendNews(id, index)
                         }
@@ -135,22 +136,14 @@ function getNews(sendType, message) {
 }
 
 function sendNews (id, index) {
-    console.log('sending news...',id, index)
-    bot.sendMessage({
-        chat_id: id,
-        text: `ffff`
-    })
-    console.log('sending step 2')
-    bot.sendPhoto({
-        chat_id: id,
-        files: {
-            photo: images[index]
-        },
-        caption: `${titles[index]}`
-    })
-    console.log('finish.')
+    setTimeout(() => {
+        bot.sendPhoto(id, images[index], {
+            caption: `${titles[index]} . ادامه ی خبر 👇`
+        })
+        bot.sendMessage(id, `${summaries[index]} \n ---------------`)
+        console.log('finish')
+    },100)
 }
 
 
-bot.start()
 startbot()

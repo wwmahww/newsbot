@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies" : {
-      "node-telegram-bot": "latest",
+      "node-telegram-bot-api": "latest",
       "mongodb": "latest"
   },
   "author": "amir",
